@@ -13,10 +13,26 @@ const ACCOUNTS = "./state/accounts.json";
 const RATES = "./state/rates.json";
 const LOG = "./state/log.json";
 
+
+// Si los archivos son muy grandes, puede que no alcance la memoria
+// para cargar todo en memoria
+// En ese caso, habria que implementar algun sistema de paginacion
+// o usar una base de datos
+
+
 export async function init() {
   accounts = await load(ACCOUNTS);
   rates = await load(RATES);
   log = await load(LOG);
+
+
+  // Esto de aca guarda los archivos periodicamente
+  // Va a comprometer la escalabilidad
+
+  // Tener en cuenta que si el servidor se cae
+  // se pierde todo lo que no se haya guardado aun
+  // Afecta a la durabilidad y consistencia
+  // (ACID)
 
   scheduleSave(accounts, ACCOUNTS, 1000);
   scheduleSave(rates, RATES, 5000);

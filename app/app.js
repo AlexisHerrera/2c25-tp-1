@@ -23,6 +23,9 @@ app.get("/accounts", (req, res) => {
   res.json(getAccounts());
 });
 
+// Si actualizo solo una cuenta, no es necesario enviar todas las cuentas
+// implementar que solo se envie la cuenta a actualizar
+
 app.put("/accounts/:id/balance", (req, res) => {
   const accountId = req.params.id;
   const { balance } = req.body;
@@ -71,6 +74,7 @@ app.post("/exchange", async (req, res) => {
     counterAccountId,
     baseAmount,
   } = req.body;
+  console.log(req.body);
 
   if (
     !baseCurrency ||
