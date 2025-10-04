@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -106,7 +106,7 @@
         {
           "refCount": 0,
           "refId": "A",
-          "target": "stats.arVaultexchange.net.*"
+          "target": "aliasByNode(stats.arVault.exchange.net.*, 4)"
         }
       ],
       "title": "Net Volume by currency",
@@ -198,7 +198,7 @@
         {
           "refCount": 0,
           "refId": "A",
-          "target": "aliasByNode(stats.arVaultexchange.volume.*, 3)"
+          "target": "aliasByNode(stats.arVault.exchange.volume.*, 4)"
         }
       ],
       "title": "Volume by currency",
@@ -263,32 +263,7 @@
           },
           "unit": "bytes"
         },
-        "overrides": [
-          {
-            "__systemRef": "hideSeriesFrom",
-            "matcher": {
-              "id": "byNames",
-              "options": {
-                "mode": "exclude",
-                "names": [
-                  "{__name__=\"container_memory_working_set_bytes\", container_label_com_docker_compose_config_hash=\"8ed9276b9b43971f5e501d66147c519a039b4cf02cb7c2f3b6c3aa25e8d28823\", container_label_com_docker_compose_container_number=\"1\", container_label_com_docker_compose_image=\"sha256:b343fdb9053466763f78222e1b736968f1d7a6e98b7fc3714e1f5695bcfa9d3f\", container_label_com_docker_compose_oneoff=\"False\", container_label_com_docker_compose_project=\"exchange\", container_label_com_docker_compose_project_config_files=\"/Users/alexis/Documents/fiuba/arqui/tp1/docker-compose.yml\", container_label_com_docker_compose_project_working_dir=\"/Users/alexis/Documents/fiuba/arqui/tp1\", container_label_com_docker_compose_service=\"api\", container_label_com_docker_compose_version=\"2.39.4\", id=\"/docker/09885aa811332b694cf63f7c9a5bcd11da1dd00f267d4a7a87b29fd5d2ad83d5\", image=\"exchange-api\", instance=\"cadvisor:8080\", job=\"cadvisor\", name=\"exchange-api-1\"}"
-                ],
-                "prefix": "All except:",
-                "readOnly": true
-              }
-            },
-            "properties": [
-              {
-                "id": "custom.hideFrom",
-                "value": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": true
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
@@ -317,11 +292,15 @@
             "type": "prometheus",
             "uid": "cezzfw2uztclcb"
           },
-          "editorMode": "code",
+          "disableTextWrap": false,
+          "editorMode": "builder",
           "expr": "container_memory_working_set_bytes{name=\"$container\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
           "legendFormat": "__auto",
           "range": true,
-          "refId": "A"
+          "refId": "A",
+          "useBackend": false
         }
       ],
       "title": "Memory container",
@@ -717,8 +696,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -850,8 +828,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1038,6 +1015,6 @@
   "timezone": "",
   "title": "Main dashboard",
   "uid": "arxIPammk",
-  "version": 8,
+  "version": 6,
   "weekStart": ""
 }

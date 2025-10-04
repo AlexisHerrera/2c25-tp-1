@@ -9,7 +9,7 @@ let log;
 const statsd = new StatsD({
     host: 'graphite',
     port: 8125,
-    prefix: 'arVault'
+    prefix: 'arVault.'
 })
 
 //call to initialize the exchange service
