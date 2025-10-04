@@ -119,7 +119,7 @@ export async function exchange(exchangeRequest) {
 
   //log the transaction and return it
   log.push(exchangeResult);
-
+  statsd.increment('exchange.processed');
   return exchangeResult;
 }
 
