@@ -1,50 +1,51 @@
 import { nanoid } from "nanoid";
 
-import { init as stateInit, getAccounts as stateAccounts, getRates as stateRates, getLog as stateLog } from "./state.js";
-
-let accounts;
-let rates;
-let log;
+import { 
+  init as stateInit, 
+  getAccounts as stateAccounts, 
+  getRates as stateRates, 
+  getLog as stateLog,
+  updateAccountBalance,
+  updateRate,
+  addTransactionLog,
+  findAccountById,
+  findAccountByCurrency,
+  getRate
+} from "./state.js";
 
 //call to initialize the exchange service
 export async function init() {
   await stateInit();
-
-  accounts = stateAccounts();
-  rates = stateRates();
-  log = stateLog();
 }
 
 //returns all internal accounts
-export function getAccounts() {
-  return accounts;
+export async function getAccounts() {
+  return await stateAccounts();
 }
 
 //sets balance for an account
-export function setAccountBalance(accountId, balance) {
-  const account = findAccountById(accountId);
+export async function setAccountBalance(accountId, balance) {
+  const account = await findAccountById(accountId);
 
   if (account != null) {
-    account.balance = balance;
+    await updateAccountBalance(accountId, balance);
   }
 }
 
 //returns all current exchange rates
-export function getRates() {
-  return rates;
+export async function getRates() {
+  return await stateRates();
 }
 
 //returns the whole transaction log
-export function getLog() {
-  return log;
+export async function getLog() {
+  return await stateLog();
 }
 
 //sets the exchange rate for a given pair of currencies, and the reciprocal rate as well
-export function setRate(rateRequest) {
+export async function setRate(rateRequest) {
   const { baseCurrency, counterCurrency, rate } = rateRequest;
-
-  rates[baseCurrency][counterCurrency] = rate;
-  rates[counterCurrency][baseCurrency] = Number((1 / rate).toFixed(5));
+  await updateRate(baseCurrency, counterCurrency, rate);
 }
 
 //executes an exchange operation
@@ -58,13 +59,17 @@ export async function exchange(exchangeRequest) {
   } = exchangeRequest;
 
   //get the exchange rate
-  const exchangeRate = rates[baseCurrency][counterCurrency];
+  const exchangeRate = await getRate(baseCurrency, counterCurrency);
+  if (!exchangeRate) {
+    throw new Error(`Exchange rate not found for ${baseCurrency}/${counterCurrency}`);
+  }
+  
   //compute the requested (counter) amount
   const counterAmount = baseAmount * exchangeRate;
   //find our account on the provided (base) currency
-  const baseAccount = findAccountByCurrency(baseCurrency);
+  const baseAccount = await findAccountByCurrency(baseCurrency);
   //find our account on the counter currency
-  const counterAccount = findAccountByCurrency(counterCurrency);
+  const counterAccount = await findAccountByCurrency(counterCurrency);
 
   //construct the result object with defaults
   const exchangeResult = {
@@ -86,8 +91,8 @@ export async function exchange(exchangeRequest) {
         await transfer(counterAccount.id, clientCounterAccountId, counterAmount)
       ) {
         //all good, update balances
-        baseAccount.balance += baseAmount;
-        counterAccount.balance -= counterAmount;
+        await updateAccountBalance(baseAccount.id, baseAccount.balance + baseAmount);
+        await updateAccountBalance(counterAccount.id, counterAccount.balance - counterAmount);
         exchangeResult.ok = true;
         exchangeResult.counterAmount = counterAmount;
       } else {
@@ -105,7 +110,7 @@ export async function exchange(exchangeRequest) {
   }
 
   //log the transaction and return it
-  log.push(exchangeResult);
+  await addTransactionLog(exchangeResult);
 
   return exchangeResult;
 }
@@ -119,22 +124,5 @@ async function transfer(fromAccountId, toAccountId, amount) {
   );
 }
 
-function findAccountByCurrency(currency) {
-  for (let account of accounts) {
-    if (account.currency == currency) {
-      return account;
-    }
-  }
-
-  return null;
-}
-
-function findAccountById(id) {
-  for (let account of accounts) {
-    if (account.id == id) {
-      return account;
-    }
-  }
-
-  return null;
-}
+// Las funciones findAccountByCurrency y findAccountById ahora están en state.js
+// y son importadas al inicio del archivo

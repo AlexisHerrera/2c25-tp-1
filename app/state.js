@@ -1,84 +1,125 @@
-import { fileURLToPath } from "url";
-import path from "path";
-import fs from "fs";
+import { connectToDatabase } from './database/connection.js';
+import Account from './models/Account.js';
+import Rate from './models/Rate.js';
+import TransactionLog from './models/TransactionLog.js';
 
-let accounts = null;
-let rates = null;
-let log = null;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const ACCOUNTS = "./state/accounts.json";
-const RATES = "./state/rates.json";
-const LOG = "./state/log.json";
-
-
-// Si los archivos son muy grandes, puede que no alcance la memoria
-// para cargar todo en memoria
-// En ese caso, habria que implementar algun sistema de paginacion
-// o usar una base de datos
-
-
+// Con MongoDB, ya no necesitamos mantener datos en memoria
+// ni guardar periodicamente - la base de datos maneja la persistencia
 export async function init() {
-  accounts = await load(ACCOUNTS);
-  rates = await load(RATES);
-  log = await load(LOG);
-
-
-  // Esto de aca guarda los archivos periodicamente
-  // Va a comprometer la escalabilidad
-
-  // Tener en cuenta que si el servidor se cae
-  // se pierde todo lo que no se haya guardado aun
-  // Afecta a la durabilidad y consistencia
-  // (ACID)
-
-  scheduleSave(accounts, ACCOUNTS, 1000);
-  scheduleSave(rates, RATES, 5000);
-  scheduleSave(log, LOG, 1000);
+  await connectToDatabase();
+  console.log('State initialized with MongoDB connection');
 }
 
-export function getAccounts() {
-  return accounts;
-}
-
-export function getRates() {
-  return rates;
-}
-
-export function getLog() {
-  return log;
-}
-
-async function load(fileName) {
-  const filePath = path.join(__dirname, fileName);
-
+export async function getAccounts() {
   try {
-    await fs.promises.access(filePath);
-    const raw = await fs.promises.readFile(filePath, "utf8");
+    return await Account.find({}).lean();
+  } catch (error) {
+    console.error('Error fetching accounts:', error);
+    throw error;
+  }
+}
+
+export async function getRates() {
+  try {
+    const rates = await Rate.find({}).lean();
     
-    return JSON.parse(raw);
-  } catch (err) {
-    if (err.code == "ENOENT") {
-      console.error(`${filePath} not found`);
-    } else {
-      console.error(`Error loading ${filePath}:`, err);
-    }
+    // Convertir a la estructura original anidada
+    const ratesStructure = {};
+    
+    rates.forEach(rate => {
+      if (!ratesStructure[rate.baseCurrency]) {
+        ratesStructure[rate.baseCurrency] = {};
+      }
+      ratesStructure[rate.baseCurrency][rate.counterCurrency] = rate.rate;
+    });
+    
+    return ratesStructure;
+  } catch (error) {
+    console.error('Error fetching rates:', error);
+    throw error;
   }
 }
 
-async function save(data, fileName) {
-  const filePath = path.join(__dirname, fileName);
+export async function getLog() {
   try {
-    await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2));
-  } catch (err) {
-    console.error(`Error writing to ${filePath}:`, err);
+    return await TransactionLog.find({}).lean();
+  } catch (error) {
+    console.error('Error fetching transaction log:', error);
+    throw error;
   }
 }
 
-function scheduleSave(data, fileName, period) {
-  setInterval(async () => {
-    await save(data, fileName);
-  }, period);
+export async function updateAccountBalance(accountId, balance) {
+  try {
+    const result = await Account.findOneAndUpdate(
+      { id: accountId },
+      { balance: balance },
+      { new: true }
+    );
+    return result;
+  } catch (error) {
+    console.error('Error updating account balance:', error);
+    throw error;
+  }
+}
+
+export async function updateRate(baseCurrency, counterCurrency, rate) {
+  try {
+    // Actualizar la tasa principal
+    await Rate.findOneAndUpdate(
+      { baseCurrency, counterCurrency },
+      { rate },
+      { upsert: true, new: true }
+    );
+    
+    // Actualizar la tasa inversa
+    const inverseRate = Number((1 / rate).toFixed(5));
+    await Rate.findOneAndUpdate(
+      { baseCurrency: counterCurrency, counterCurrency: baseCurrency },
+      { rate: inverseRate },
+      { upsert: true, new: true }
+    );
+    
+  } catch (error) {
+    console.error('Error updating rate:', error);
+    throw error;
+  }
+}
+
+export async function addTransactionLog(transaction) {
+  try {
+    const newTransaction = new TransactionLog(transaction);
+    return await newTransaction.save();
+  } catch (error) {
+    console.error('Error adding transaction log:', error);
+    throw error;
+  }
+}
+
+export async function findAccountById(accountId) {
+  try {
+    return await Account.findOne({ id: accountId }).lean();
+  } catch (error) {
+    console.error('Error finding account by id:', error);
+    throw error;
+  }
+}
+
+export async function findAccountByCurrency(currency) {
+  try {
+    return await Account.findOne({ currency }).lean();
+  } catch (error) {
+    console.error('Error finding account by currency:', error);
+    throw error;
+  }
+}
+
+export async function getRate(baseCurrency, counterCurrency) {
+  try {
+    const rateDoc = await Rate.findOne({ baseCurrency, counterCurrency }).lean();
+    return rateDoc ? rateDoc.rate : null;
+  } catch (error) {
+    console.error('Error getting rate:', error);
+    throw error;
+  }
 }

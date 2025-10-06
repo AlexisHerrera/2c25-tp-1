@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config({ path: '../.env' });
+
 import express from "express";
 
 import {
@@ -19,49 +22,72 @@ app.use(express.json());
 
 // ACCOUNT endpoints
 
-app.get("/accounts", (req, res) => {
-  res.json(getAccounts());
+app.get("/accounts", async (req, res) => {
+  try {
+    const accounts = await getAccounts();
+    res.json(accounts);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching accounts" });
+  }
 });
 
 // Si actualizo solo una cuenta, no es necesario enviar todas las cuentas
 // implementar que solo se envie la cuenta a actualizar
 
-app.put("/accounts/:id/balance", (req, res) => {
-  const accountId = req.params.id;
+app.put("/accounts/:id/balance", async (req, res) => {
+  const accountId = parseInt(req.params.id);
   const { balance } = req.body;
 
-  if (!accountId || !balance) {
+  if (!accountId || balance === undefined) {
     return res.status(400).json({ error: "Malformed request" });
   } else {
-    setAccountBalance(accountId, balance);
-
-    res.json(getAccounts());
+    try {
+      await setAccountBalance(accountId, balance);
+      const accounts = await getAccounts();
+      res.json(accounts);
+    } catch (error) {
+      res.status(500).json({ error: "Error updating account balance" });
+    }
   }
 });
 
 // RATE endpoints
 
-app.get("/rates", (req, res) => {
-  res.json(getRates());
+app.get("/rates", async (req, res) => {
+  try {
+    const rates = await getRates();
+    res.json(rates);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching rates" });
+  }
 });
 
-app.put("/rates", (req, res) => {
+app.put("/rates", async (req, res) => {
   const { baseCurrency, counterCurrency, rate } = req.body;
 
   if (!baseCurrency || !counterCurrency || !rate) {
     return res.status(400).json({ error: "Malformed request" });
   }
 
-  const newRateRequest = { ...req.body };
-  setRate(newRateRequest);
-
-  res.json(getRates());
+  try {
+    const newRateRequest = { ...req.body };
+    await setRate(newRateRequest);
+    const rates = await getRates();
+    res.json(rates);
+  } catch (error) {
+    res.status(500).json({ error: "Error updating rates" });
+  }
 });
 
 // LOG endpoint
 
-app.get("/log", (req, res) => {
-  res.json(getLog());
+app.get("/log", async (req, res) => {
+  try {
+    const log = await getLog();
+    res.json(log);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching transaction log" });
+  }
 });
 
 // EXCHANGE endpoint
