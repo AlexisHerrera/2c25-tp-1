@@ -1,0 +1,9 @@
+{
+  "watch": ["*.js", "models/**/*.js", "database/**/*.js"],
+  "ext": "js,json",
+  "ignore": ["node_modules/**", "state/**"],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 1000
+}

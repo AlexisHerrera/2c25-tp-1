@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-dotenv.config({ path: '../.env' });
+dotenv.config();
 
 import express from "express";
 
@@ -13,10 +13,13 @@ import {
   exchange,
 } from "./exchange.js";
 
+
 await exchangeInit();
 
 const app = express();
 const port = 3000;
+
+console.log("🚀 Hot reload is working! Server starting with secure env variables...");
 
 app.use(express.json());
 
@@ -30,6 +33,7 @@ app.get("/accounts", async (req, res) => {
     res.status(500).json({ error: "Error fetching accounts" });
   }
 });
+
 
 // Si actualizo solo una cuenta, no es necesario enviar todas las cuentas
 // implementar que solo se envie la cuenta a actualizar
