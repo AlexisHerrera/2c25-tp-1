@@ -14,7 +14,6 @@ import {
 } from "./state.js";
 
 import StatsD from 'node-statsd'
-import { init as stateInit, getAccounts as stateAccounts, getRates as stateRates, getLog as stateLog } from "./state.js";
 
 let accounts;
 let rates;
