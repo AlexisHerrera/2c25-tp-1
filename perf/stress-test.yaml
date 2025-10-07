@@ -8,7 +8,7 @@ config:
           port: 8125
           prefix: "artillery-api"
   phases:
-    - duration: 300
+    - duration: 180
       arrivalRate: 1
       rampTo: 1000
       name: "Ramp up to failure"
