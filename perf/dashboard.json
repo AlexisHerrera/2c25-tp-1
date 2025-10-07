@@ -2,7 +2,7 @@
   "__inputs": [
     {
       "name": "DS_GRAPHITE",
-      "label": "Graphite",
+      "label": "graphite",
       "description": "",
       "type": "datasource",
       "pluginId": "graphite",
@@ -149,14 +149,14 @@
       "pluginVersion": "11.5.2",
       "targets": [
         {
-          "refCount": 0,
-          "refId": "A",
-          "target": "alias(scaleToSeconds(sumSeries(stats.gauges.$server.codes.*, stats.gauges.$server.errors.*), 1), 'RPS Client (Artillery)')",
-          "textEditor": true,
           "datasource": {
             "type": "graphite",
             "uid": "${DS_GRAPHITE}"
-          }
+          },
+          "refCount": 0,
+          "refId": "A",
+          "target": "alias(scaleToSeconds(sumSeries(stats.gauges.$server.codes.*, stats.gauges.$server.errors.*), 1), 'RPS Client (Artillery)')",
+          "textEditor": true
         },
         {
           "datasource": {
@@ -257,13 +257,13 @@
       "pluginVersion": "11.5.2",
       "targets": [
         {
-          "refCount": 0,
-          "refId": "A",
-          "target": "aliasByNode(stats.gauges.$server.scenarioDuration.p90, 4)",
           "datasource": {
             "type": "graphite",
             "uid": "${DS_GRAPHITE}"
-          }
+          },
+          "refCount": 0,
+          "refId": "A",
+          "target": "aliasByNode(stats.gauges.$server.scenarioDuration.p90, 4)"
         },
         {
           "datasource": {
@@ -386,13 +386,13 @@
       "pluginVersion": "11.5.2",
       "targets": [
         {
-          "refCount": 0,
-          "refId": "A",
-          "target": "aliasByNode(stats.arVault.exchange.net.*, 4)",
           "datasource": {
             "type": "graphite",
             "uid": "${DS_GRAPHITE}"
-          }
+          },
+          "refCount": 0,
+          "refId": "A",
+          "target": "aliasByNode(stats.arVault.exchange.net.*, 4)"
         }
       ],
       "title": "Net Volume by currency",
@@ -482,13 +482,13 @@
       "pluginVersion": "11.5.2",
       "targets": [
         {
-          "refCount": 0,
-          "refId": "A",
-          "target": "aliasByNode(stats.arVault.exchange.volume.*, 4)",
           "datasource": {
             "type": "graphite",
             "uid": "${DS_GRAPHITE}"
-          }
+          },
+          "refCount": 0,
+          "refId": "A",
+          "target": "aliasByNode(stats.arVault.exchange.volume.*, 4)"
         }
       ],
       "title": "Volume by currency",
@@ -773,14 +773,14 @@
       "pluginVersion": "11.5.2",
       "targets": [
         {
-          "refCount": 0,
-          "refId": "A",
-          "target": "alias(stats.gauges.$server.codes.200, 'Success (200 OK)')\n",
-          "textEditor": true,
           "datasource": {
             "type": "graphite",
             "uid": "${DS_GRAPHITE}"
-          }
+          },
+          "refCount": 0,
+          "refId": "A",
+          "target": "alias(stats.gauges.$server.codes.200, 'Success (200 OK)')",
+          "textEditor": false
         },
         {
           "datasource": {
@@ -790,107 +790,33 @@
           "hide": false,
           "refCount": 0,
           "refId": "B",
-          "target": "alias(sumSeries(stats.gauges.$server.codes.4*, stats.gauges.$server.codes.5*, stats.gauges.$server.errors.*), 'Error')",
-          "textEditor": true
-        }
-      ],
-      "title": "Success vs Error",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "graphite",
-        "uid": "${DS_GRAPHITE}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
+          "target": "alias(stats.gauges.$server.codes.429, 'Too Many Requests (429)')",
+          "textEditor": false
         },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 24
-      },
-      "id": 16,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.5.2",
-      "targets": [
         {
-          "refCount": 0,
-          "refId": "A",
-          "target": "alias(stats.gauges.$server.pendingRequests, 'Pending Requests')",
-          "textEditor": true,
           "datasource": {
             "type": "graphite",
             "uid": "${DS_GRAPHITE}"
-          }
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "C",
+          "target": "alias(stats.gauges.$server.codes.500, 'Server Error / Not enough funds (500)')",
+          "textEditor": true
+        },
+        {
+          "datasource": {
+            "type": "graphite",
+            "uid": "${DS_GRAPHITE}"
+          },
+          "hide": false,
+          "refCount": 0,
+          "refId": "D",
+          "target": "alias(sumSeries(stats.gauges.$server.errors.*), 'Timeout and Network Error')",
+          "textEditor": true
         }
       ],
-      "title": "Pending Requests",
+      "title": "Error codes",
       "type": "timeseries"
     },
     {
@@ -1303,8 +1229,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1437,8 +1362,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -1625,6 +1549,6 @@
   "timezone": "",
   "title": "Main dashboard",
   "uid": "arxIPammk",
-  "version": 1,
+  "version": 4,
   "weekStart": ""
 }

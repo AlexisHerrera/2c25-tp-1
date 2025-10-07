@@ -1,0 +1,26 @@
+config:
+  environments:
+    api:
+      target: 'http://localhost:5555'
+      plugins:
+        statsd:
+          host: localhost
+          port: 8125
+          prefix: "artillery-api"
+  phases:
+    - duration: 300
+      arrivalRate: 1
+      rampTo: 1000
+      name: "Ramp up to failure"
+
+scenarios:
+  - name: "Find the breaking point"
+    flow:
+      - post:
+          url: "/exchange"
+          json:
+            baseCurrency: "USD"
+            counterCurrency: "ARS"
+            baseAmount: 1
+            baseAccountId: 11
+            counterAccountId: 10
