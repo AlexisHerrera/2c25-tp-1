@@ -19,6 +19,9 @@
     "nanoid": "^5.1.2"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "nanoid": "^5.1.2",
+    "node-statsd": "^0.1.1"
+
   }
 }

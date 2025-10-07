@@ -1,3 +1,4 @@
+
 # Environment variables
 .env
 .env.local
@@ -20,3 +21,6 @@ logs/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+/.idea/
+

@@ -1,0 +1,33 @@
+config:
+  environments:
+    api:
+      target: 'http://localhost:5555'
+      plugins:
+        statsd:
+          host: localhost
+          port: 8125
+          prefix: "artillery-api"
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 100
+      name: "Ramp up to normal load"
+    - duration: 30
+      arrivalRate: 100
+      rampTo: 600
+      name: "Ramp up to max load"
+    - duration: 30
+      arrivalRate: 600
+      name: "Sustain big load"
+
+scenarios:
+  - name: "Exchange operations (USD to ARS)"
+    flow:
+      - post:
+          url: "/exchange"
+          json:
+            baseCurrency: "USD"
+            counterCurrency: "ARS"
+            baseAmount: 1
+            baseAccountId: 11
+            counterAccountId: 10
