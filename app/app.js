@@ -35,6 +35,7 @@ app.get("/accounts", async (req, res) => {
 });
 
 
+
 // Si actualizo solo una cuenta, no es necesario enviar todas las cuentas
 // implementar que solo se envie la cuenta a actualizar
 
@@ -104,7 +105,6 @@ app.post("/exchange", async (req, res) => {
     counterAccountId,
     baseAmount,
   } = req.body;
-  console.log(req.body);
 
   if (
     !baseCurrency ||

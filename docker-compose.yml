@@ -5,9 +5,17 @@ services:
       - "3000:3000"
     env_file:
       - .env
+    # Override MONGODB_URI here to point to a local Mongo service provided
+    # by this docker-compose file. This avoids editing the developer's .env
+    # and lets Docker Compose inject the local connection string.
+    environment:
+      - MONGODB_URI=mongodb://mongo:27017
+      - DB_NAME=exchange-service
     volumes:
       - ./app:/opt/app
       - /opt/app/node_modules
+    depends_on:
+      - mongo
 
   nginx:
     image: nginx:1.27.4
@@ -49,6 +57,15 @@ services:
       - "/sys:/sys:ro"
       - "/var/lib/docker/:/var/lib/docker:ro"
 
+  # Local MongoDB service for development/testing (binds to host 27017)
+  mongo:
+    image: mongo:6.0
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -63,4 +80,6 @@ services:
 
 volumes:
   grafana_config:
+    driver: local
+  mongo_data:
     driver: local
