@@ -10,13 +10,13 @@ config:
 
   phases:
     - duration: 60
-      arrivalRate: 5
+      arrivalRate: 20
       name: "Base load"
-    - duration: 15
-      arrivalRate: 100
+    - duration: 60
+      arrivalRate: 200
       name: "Spike"
-    - duration: 120
-      arrivalRate: 5
+    - duration: 60
+      arrivalRate: 20
       name: "Recovery"
 
 scenarios:
