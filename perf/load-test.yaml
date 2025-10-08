@@ -12,7 +12,7 @@ config:
       arrivalRate: 1
       rampTo: 20
       name: "Ramp up to normal load"
-    - duration: 300
+    - duration: 120
       arrivalRate: 20
       name: "Sustain normal load"
 

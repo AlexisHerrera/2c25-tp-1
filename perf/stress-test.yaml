@@ -8,20 +8,13 @@ config:
           port: 8125
           prefix: "artillery-api"
   phases:
-    - duration: 60
+    - duration: 180
       arrivalRate: 1
-      rampTo: 100
-      name: "Ramp up to normal load"
-    - duration: 30
-      arrivalRate: 100
-      rampTo: 600
-      name: "Ramp up to max load"
-    - duration: 30
-      arrivalRate: 600
-      name: "Sustain big load"
+      rampTo: 1000
+      name: "Ramp up to failure"
 
 scenarios:
-  - name: "Exchange operations (USD to ARS)"
+  - name: "Find the breaking point"
     flow:
       - post:
           url: "/exchange"

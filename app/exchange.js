@@ -1,16 +1,10 @@
 import { nanoid } from "nanoid";
-import StatsD from 'node-statsd'
 import { init as stateInit, getAccounts as stateAccounts, getRates as stateRates, getLog as stateLog } from "./state.js";
 
 let accounts;
 let rates;
 let log;
 
-const statsd = new StatsD({
-    host: 'graphite',
-    port: 8125,
-    prefix: 'arVault.'
-})
 
 //call to initialize the exchange service
 export async function init() {
@@ -54,7 +48,7 @@ export function setRate(rateRequest) {
 }
 
 //executes an exchange operation
-export async function exchange(exchangeRequest) {
+export async function exchange(exchangeRequest, statsd) {
   const {
     baseCurrency,
     counterCurrency,
@@ -118,7 +112,12 @@ export async function exchange(exchangeRequest) {
   }
 
   //log the transaction and return it
-  log.push(exchangeResult);
+  
+  log.push(exchangeResult); 
+  
+  // WIP: Provisorio para no llenar mucho el log
+  if (log.length > 1000) log = log.slice(-1000);
+
   statsd.increment('exchange.processed');
   return exchangeResult;
 }

@@ -1,6 +1,14 @@
 services:
     api:
-      build: ./app
+        build: ./app
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+        deploy:
+            resources:
+                limits:
+                    # cpus: '0.25'
+                    # cpus: '0.5'
+                    # cpus: '1'
 
     nginx:
         image: nginx:1.27.4
@@ -33,7 +41,7 @@ services:
         image: gcr.io/cadvisor/cadvisor:v0.49.2
         links:
             - graphite
-        command: -storage_driver="statsd" -storage_driver_host="graphite:8125" -storage_driver_db="cadvisor" -storage_driver_buffer_duration="1s" --docker_only=true
+        # command: -storage_driver="statsd" -storage_driver_host="graphite:8125" -storage_driver_db="cadvisor" -storage_driver_buffer_duration="1s" --docker_only=true
         ports:
             - "8080:8080"
         volumes:
@@ -43,16 +51,16 @@ services:
             - "/var/lib/docker/:/var/lib/docker:ro"
 
     prometheus:
-      image: prom/prometheus:latest
-      container_name: prometheus
-      ports:
-        - "9090:9090"
-      volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      command:
-        - '--config.file=/etc/prometheus/prometheus.yml'
-      depends_on:
-        - cadvisor
+        image: prom/prometheus:latest
+        container_name: prometheus
+        ports:
+            - "9090:9090"
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml
+        command:
+            - '--config.file=/etc/prometheus/prometheus.yml'
+        depends_on:
+            - cadvisor
 
 volumes:
     grafana_config:
