@@ -55,72 +55,78 @@ export function setRate(rateRequest) {
 
 //executes an exchange operation
 export async function exchange(exchangeRequest) {
-  const {
-    baseCurrency,
-    counterCurrency,
-    baseAccountId: clientBaseAccountId,
-    counterAccountId: clientCounterAccountId,
-    baseAmount,
-  } = exchangeRequest;
+    const {
+        baseCurrency,
+        counterCurrency,
+        baseAccountId: clientBaseAccountId,
+        counterAccountId: clientCounterAccountId,
+        baseAmount,
+    } = exchangeRequest;
 
-  //get the exchange rate
-  const exchangeRate = rates[baseCurrency][counterCurrency];
-  //compute the requested (counter) amount
-  const counterAmount = baseAmount * exchangeRate;
-  //find our account on the provided (base) currency
-  const baseAccount = findAccountByCurrency(baseCurrency);
-  //find our account on the counter currency
-  const counterAccount = findAccountByCurrency(counterCurrency);
+    const exchangeResult = {
+        id: nanoid(),
+        ts: new Date(),
+        ok: false,
+        request: exchangeRequest,
+        exchangeRate: 0.0,
+        counterAmount: 0.0,
+        obs: null,
+    };
 
-  //construct the result object with defaults
-  const exchangeResult = {
-    id: nanoid(),
-    ts: new Date(),
-    ok: false,
-    request: exchangeRequest,
-    exchangeRate: exchangeRate,
-    counterAmount: 0.0,
-    obs: null,
-  };
-
-  //check if we have funds on the counter currency account
-  if (counterAccount.balance >= counterAmount) {
-    //try to transfer from clients' base account
-    if (await transfer(clientBaseAccountId, baseAccount.id, baseAmount)) {
-      //try to transfer to clients' counter account
-      if (
-        await transfer(counterAccount.id, clientCounterAccountId, counterAmount)
-      ) {
-        //all good, update balances
-        baseAccount.balance += baseAmount;
-        counterAccount.balance -= counterAmount;
-        exchangeResult.ok = true;
-        exchangeResult.counterAmount = counterAmount;
-
-        // Total volume of every currency
-        statsd.increment(`exchange.volume.${baseCurrency}`, baseAmount)
-        statsd.increment(`exchange.volume.${counterCurrency}`, counterAmount)
-        // net change of internal accounts
-        statsd.increment(`exchange.net.${baseCurrency}`, baseAmount)
-        statsd.increment(`exchange.net.${counterCurrency}`, -counterAmount)
-      } else {
-        //could not transfer to clients' counter account, return base amount to client
-        await transfer(baseAccount.id, clientBaseAccountId, baseAmount);
-        exchangeResult.obs = "Could not transfer to clients' account";
-      }
-    } else {
-      //could not withdraw from clients' account
-      exchangeResult.obs = "Could not withdraw from clients' account";
+    if (typeof baseAmount !== 'number' || baseAmount <= 0) {
+        exchangeResult.obs = "Invalid baseAmount: must be a positive number.";
+        log.push(exchangeResult);
+        statsd.increment('exchange.processed');
+        return exchangeResult;
     }
-  } else {
-    //not enough funds on internal counter account
-    exchangeResult.obs = "Not enough funds on counter currency account";
-  }
 
-  //log the transaction and return it
-  log.push(exchangeResult);
-  statsd.increment('exchange.processed');
-  return exchangeResult;
+    if (baseCurrency === counterCurrency) {
+        exchangeResult.obs = "Base and counter currencies cannot be the same.";
+        log.push(exchangeResult);
+        statsd.increment('exchange.processed');
+        return exchangeResult;
+    }
+
+    if (!rates[baseCurrency] || !rates[baseCurrency][counterCurrency]) {
+        exchangeResult.obs = `Exchange rate not found for ${baseCurrency}/${counterCurrency}`;
+        log.push(exchangeResult);
+        statsd.increment('exchange.processed');
+        return exchangeResult;
+    }
+
+    const exchangeRate = rates[baseCurrency][counterCurrency];
+    exchangeResult.exchangeRate = exchangeRate;
+
+    const counterAmount = baseAmount * exchangeRate;
+    const baseAccount = findAccountByCurrency(baseCurrency);
+    const counterAccount = findAccountByCurrency(counterCurrency);
+
+    if (counterAccount.balance >= counterAmount) {
+        if (await transfer(clientBaseAccountId, baseAccount.id, baseAmount)) {
+            if (await transfer(counterAccount.id, clientCounterAccountId, counterAmount)) {
+                baseAccount.balance += baseAmount;
+                counterAccount.balance -= counterAmount;
+                exchangeResult.ok = true;
+                exchangeResult.counterAmount = counterAmount;
+
+                statsd.increment(`exchange.volume.${baseCurrency}`, baseAmount);
+                statsd.increment(`exchange.volume.${counterCurrency}`, counterAmount);
+                statsd.increment(`exchange.net.${baseCurrency}`, baseAmount);
+                statsd.increment(`exchange.net.${counterCurrency}`, -counterAmount);
+            } else {
+                await transfer(baseAccount.id, clientBaseAccountId, baseAmount);
+                exchangeResult.obs = "Could not transfer to clients' account";
+            }
+        } else {
+            exchangeResult.obs = "Could not withdraw from clients' account";
+        }
+    } else {
+        exchangeResult.obs = "Not enough funds on counter currency account";
+    }
+
+    log.push(exchangeResult);
+    statsd.increment('exchange.processed');
+    return exchangeResult;
 }
 
 // internal - call transfer service to execute transfer between accounts
