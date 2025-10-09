@@ -5,9 +5,6 @@ services:
       - "3000:3000"
     env_file:
       - .env
-    # Override MONGODB_URI here to point to a local Mongo service provided
-    # by this docker-compose file. This avoids editing the developer's .env
-    # and lets Docker Compose inject the local connection string.
     environment:
       - MONGODB_URI=mongodb://mongo:27017
       - DB_NAME=exchange-service
@@ -16,6 +13,10 @@ services:
       - /opt/app/node_modules
     depends_on:
       - mongo
+    #deploy:
+    #  resources:
+    #    limits:
+    #      cpus: "0.25"
 
   nginx:
     image: nginx:1.27.4

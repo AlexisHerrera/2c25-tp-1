@@ -5,21 +5,25 @@ Este proyecto ha sido migrado de almacenamiento en archivos JSON a MongoDB Atlas
 ## Configuración de MongoDB Atlas
 
 ### 1. Crear una cuenta en MongoDB Atlas
+
 1. Ve a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 2. Crea una cuenta gratuita
 3. Crea un nuevo cluster
 
 ### 2. Configurar acceso a la base de datos
+
 1. En tu cluster, ve a "Database Access"
 2. Crea un usuario de base de datos con permisos de lectura/escritura
 3. En "Network Access", agrega tu IP actual o `0.0.0.0/0` para acceso desde cualquier IP (solo para desarrollo)
 
 ### 3. Obtener la cadena de conexión
+
 1. En tu cluster, haz clic en "Connect"
 2. Selecciona "Connect your application"
 3. Copia la cadena de conexión
 
 ### 4. Configurar variables de entorno
+
 Edita el archivo `.env` en la raíz del proyecto:
 
 ```env
@@ -28,6 +32,7 @@ DB_NAME=exchange-service
 ```
 
 Reemplaza:
+
 - `<username>`: Tu usuario de base de datos
 - `<password>`: La contraseña del usuario
 - `<cluster-url>`: La URL de tu cluster
@@ -36,12 +41,17 @@ Reemplaza:
 ## Comandos disponibles
 
 ### Poblar la base de datos con datos iniciales
+
 ```bash
-cd app
-npm run seed
+
+1 docker compose up -d mongo
+
+2 docker compose run --rm api node seed.js
+
 ```
 
 ### Iniciar la aplicación
+
 ```bash
 cd app
 npm run start
@@ -50,6 +60,7 @@ npm run start
 ## Cambios realizados
 
 ### Nuevos archivos:
+
 - `app/models/Account.js` - Modelo de cuentas
 - `app/models/Rate.js` - Modelo de tasas de cambio
 - `app/models/TransactionLog.js` - Modelo de transacciones
@@ -58,6 +69,7 @@ npm run start
 - `MONGODB_MIGRATION.md` - Este archivo
 
 ### Archivos modificados:
+
 - `app/state.js` - Refactorizado para usar MongoDB
 - `app/exchange.js` - Actualizado para operaciones asíncronas
 - `app/app.js` - Endpoints actualizados para async/await
@@ -65,12 +77,14 @@ npm run start
 - `.env` - Configuración de MongoDB
 
 ### Características mantenidas:
+
 - Misma API REST
 - Misma estructura de datos
 - Mismo comportamiento de negocio
 - Compatibilidad con el sistema existente
 
 ### Mejoras obtenidas:
+
 - ✅ Persistencia automática (sin schedules)
 - ✅ Mejor escalabilidad
 - ✅ Consistencia ACID
@@ -81,6 +95,7 @@ npm run start
 ## Estructura de datos en MongoDB
 
 ### Colección `accounts`
+
 ```json
 {
   "_id": ObjectId,
@@ -93,6 +108,7 @@ npm run start
 ```
 
 ### Colección `rates`
+
 ```json
 {
   "_id": ObjectId,
@@ -105,6 +121,7 @@ npm run start
 ```
 
 ### Colección `transactionlogs`
+
 ```json
 {
   "_id": ObjectId,
